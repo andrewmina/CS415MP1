@@ -55,8 +55,17 @@
     </option>
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>12</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
-      <inline-watch fileUrl="file://$PROJECT_DIR$/main.py" line="27">
+      <inline-watch fileUrl="file://$PROJECT_DIR$/main.py" line="49">
         <watch expression="second" language="Python" />
       </inline-watch>
     </watches-manager>
