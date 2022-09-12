@@ -11,15 +11,25 @@ def correlation(im, kernel):
     kernel_height = kernel.shape[0] ## getting the number of rows in the tuple
     kernel_width = kernel.shape[1] ## getting the number of columns in the tuple
 
-    top = kernel_height-1
+    top = kernel_height-1  ## getting the last row in the kernel
     bottom = 0
     height_swaps = int(kernel_height / 2)
     for i in range(height_swaps):  ## swapping the kernel horizontally first
-        temp = kernel[top, :]
-        kernel[top, :] = kernel[bottom]
-        kernel[bottom, :] = temp
+        first = kernel.take(top,0)
+        second = kernel.take(bottom,0)
+        kernel[top] = second
+        kernel[bottom] = first
         bottom+=1
         top-=1
+
+    width_swaps = int(kernel_width/2)
+    left = 0
+    right = kernel_width-1
+    for i in range(width_swaps):  ## swapping horizontally
+        kernel[:,[left,right]] = kernel[:,[right,left]]
+        left+=1
+        right-=1
+
     print(kernel)
 
 
@@ -35,9 +45,16 @@ def correlation(im, kernel):
                 im_out[y, x, c]= new_value
     return im_out
 
-kernel = np.array([[1,2,3],
-                   [4,5,6],
-                   [7,8,9]])/9
+kernel = np.array([[1,2,3,4, 5],
+                   [6,7,8,9,10],
+                   [11,12,13,14,15],
+                   [16,17,18,19,20],
+                   [21,22,23,24,25]])/9
+
+# kernel = np.array([[1,2,3],
+#                   [4,5,6],
+#                   [7,8,9]])/9
+
 im = cv2.imread("lena.png")
 im = im.astype(float)
 test = kernel.shape
