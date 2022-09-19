@@ -1,26 +1,30 @@
+import math
+
 import cv2
 import numpy as np
 
 
+# def convolutionGaussian(im, kernel):
+#     im_height, im_width, im_channels = im.shape
+#     kernel_size = kernel.shape[0]
+#     pad_size = int((kernel_size - 1) / 2)
+#     im_padded = np.zeros((im_height + pad_size * 2, im_width + pad_size * 2, im_channels))
+#     im_padded[pad_size:-pad_size, pad_size:-pad_size, :] = im
+#
+#     kernel_height = kernel.shape[0]  ## getting the number of rows in the tuple
+#     kernel_width = kernel.shape[1]  ## getting the number of columns in the tuple
+#     mid = kernel[int(kernel_height/2),int(kernel_width/2)]
+#     sigma = 1
+#     x,y = 0,0
+#     im_out = np.zeros_like(im)
+#     for c in range(im_channels):
+#         for x in range(im_width):
+#             for y in range(im_height):
+#                 im_patch = im_padded[y:y + kernel_size, x:x + kernel_size, c]
+#                 new_value = np.sum(kernel * im_patch)
+#                 im_out[y, x, c] = new_value
+#     return im_out
 
-def mean(im, kernel):
-    im_height, im_width, im_channels = im.shape
-    kernel_size = kernel.shape[0]
-    pad_size = int((kernel_size - 1) / 2)
-    im_padded = np.zeros((im_height + pad_size * 2, im_width + pad_size * 2, im_channels))
-    im_padded[pad_size:-pad_size, pad_size:-pad_size, :] = im
-
-    im_out = np.zeros_like(im)
-    height = kernel.shape[0]
-    width = kernel.shape[1]
-
-    for c in range(im_channels):
-        for x in range(im_width):
-            for y in range(im_height):
-                im_patch = im_padded[y:y + kernel_size, x:x + kernel_size, c]
-                new_value = np.sum(im_patch/(height*width))
-                im_out[y, x, c] = new_value
-    return im_out
 
 
 def convolution(im, kernel):
@@ -52,12 +56,8 @@ def convolution(im, kernel):
         left+=1
         right-=1
 
-    print(kernel)
-
-
-
-
-
+    # print(kernel)
+    # applying kernel to each patch
     im_out = np.zeros_like(im)
     for c in range(im_channels):
         for x in range(im_width):
@@ -67,21 +67,120 @@ def convolution(im, kernel):
                 im_out[y, x, c]= new_value
     return im_out
 
+
+def median(im, kernel):
+    im_height, im_width, im_channels = im.shape
+    kernel_size = kernel.shape[0]
+    pad_size = int((kernel_size - 1) / 2)
+    im_padded = np.zeros((im_height + pad_size * 2, im_width + pad_size * 2, im_channels))
+    im_padded[pad_size:-pad_size, pad_size:-pad_size, :] = im
+
+    kernel_height = kernel.shape[0]  ## getting the number of rows in the tuple
+    kernel_width = kernel.shape[1]
+
+    im_out = np.zeros_like(im)
+    for c in range(im_channels):
+        for x in range(im_width):
+            for y in range(im_height):
+                im_patch = im_padded[y:y + kernel_size, x:x + kernel_size, c]
+                patchList = []
+
+                for i in range(kernel_height):
+                    for j in range(kernel_width):
+                        patchList.append(im_patch[i,j])
+
+                patchList.sort()
+                new_value = patchList[int(len(patchList)/2)]
+                im_out[y, x, c] = new_value
+    return im_out
+
+
+def gaussian(im, kernel):
+    im_height, im_width, im_channels = im.shape
+    kernel_size = kernel.shape[0]
+    pad_size = int((kernel_size - 1) / 2)
+    im_padded = np.zeros((im_height + pad_size * 2, im_width + pad_size * 2, im_channels))
+    im_padded[pad_size:-pad_size, pad_size:-pad_size, :] = im
+
+    kernel_height = kernel.shape[0]  ## getting the number of rows in the tuple
+    kernel_width = kernel.shape[1]
+
+    kernelX = - int(kernel_height / 2)
+    kernelY = - int(kernel_width / 2)
+    sigma = 1
+    for i in range(kernel_height):
+        for j in range(kernel_width):
+            print(kernelX,",", kernelY)
+            kernel[i, j] = round((1 / (2 * (3.141) * (sigma ** 2))) * (2.718) ** -(
+                        ((kernelX ** 2) + (kernelY ** 2)) / (2 * (sigma ** 2))), 3)
+            kernelX += 1
+        # kernelX += 1
+        if kernelX >= int(kernel_height / 2):
+            kernelX = - int(kernel_height / 2)
+        kernelY += 1
+
+    im_out = convolution(im, kernel)
+    print(kernel)
+    return im_out
+
 # kernel = np.array([[1,2,3,4, 5],
 #                    [6,7,8,9,10],
 #                    [11,12,13,14,15],
 #                    [16,17,18,19,20],
-#                    [21,22,23,24,25]])/9
+#                    [21,22,23,24,25]])
 
-kernel = np.array([[1,2,3],
-                  [4,5,6],
-                  [7,8,9]])/9
+kernel = np.array([[1,1,1],
+                  [1,1,1],
+                  [1,1,1]])/9
+
+kernel = np.array([[1,1,1,1,1],
+                  [1,1,1,1,1],
+                  [1,1,1,1,1],
+                  [1,1,1,1,1],
+                  [1,1,1,1,1]])/9
+
+kernel = np.array([[1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1],
+                  [1,1,1,1,1,1,1,1,1]])/9
+
+# kernel = np.array([[.003,.013,.022,.013,.003],  ## Gaussian 5X5
+#                    [.013,.059,.097,.059,.013],
+#                    [.022,.097,.159,.097,.022],
+#                    [.013,.059,.097,.059,.013],
+#                    [.003,.013,.022,.013,.003]])
+
+# kernel = np.array([[.059,.097,.059],  ## Gaussian 3X3
+#                    [.097,.159,.097],
+#                    [.059,.097,.059]])
+
+# kernela = np.array([[1,1,1],  ## kernel mean
+#                   [1,1,1],
+#                   [1,1,1]])/9
+#
+# kernelb = np.array([[0,0,0],
+#                   [0,2,0],
+#                   [0,0,0]])
+# kernel = kernelb - kernela
+
+
+# print(kernel)
+
+
+
+
+
 
 im = cv2.imread("lena.png")
 im = im.astype(float)
 test = kernel.shape
 # im_out = convolution(im, kernel)
-im_out = mean(im, kernel)
+im_out = gaussian(im, kernel)
 im_out = im_out.astype(np.uint8)
 cv2.imwrite('output_image.png', im_out)
 cv2.imshow("Output", im_out)
